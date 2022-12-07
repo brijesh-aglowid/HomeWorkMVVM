@@ -3,13 +3,13 @@ package com.aglowid.myapplication.views.login
 import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.aglowid.myapplication.BuildConfig
 import com.aglowid.myapplication.R
 import com.aglowid.myapplication.databinding.FragmentLoginBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -44,48 +44,34 @@ class LoginFragment : Fragment() {
 
     //To observe live data of the viewModel
     private fun observe() {
-        viewModel.loginResponse.observe(viewLifecycleOwner) { it ->
-            it?.let { loginResponse ->
-                if (loginResponse.errorCode != "00") {
-                    requireContext().showErrorAlert("Login Failed", loginResponse.errorMessage)
-                } else if (loginResponse.user != null) {
+        viewModel.xAcc.observe(viewLifecycleOwner) { token ->
+            Log.d("X_ACC", token)
+        }
 
-                    requireContext()
-                        .getSharedPreferences(
-                            BuildConfig.APPLICATION_ID,
-                            Context.MODE_PRIVATE
-                        )
-                        .edit()
-                        .putString("Username", loginResponse.user.userName)
-                        .apply()
-
-                    requireContext().showErrorAlert(
-                        "Successful Login",
-                        "Welcome ${loginResponse.user.userName}"
-                    )
-                } else {
-                    requireContext().showErrorAlert(
-                        "Login",
-                        "User not found"
-                    )
-                }
+        viewModel.userData.observe(viewLifecycleOwner) { user ->
+            if (user != null) {
+                requireContext().showAlert(
+                    "Login Successful.",
+                    "Logged in for ${user.userName}"
+                )
             }
         }
     }
 
-    private fun Context.showErrorAlert(
+    private fun Context.showAlert(
         title: String,
-        message: String
+        message: String? = null
     ) {
         val alertDialog: AlertDialog =
             AlertDialog
                 .Builder(this)
                 .setTitle(title)
-                .setMessage(message)
                 .setPositiveButton(
                     "Ok"
                 ) { dialogInterface, _ -> dialogInterface.dismiss() }
                 .create()
+        if (message != null) alertDialog.setMessage(message)
+
         alertDialog.setCancelable(false)
         alertDialog.show()
     }

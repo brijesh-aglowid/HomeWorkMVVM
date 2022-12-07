@@ -1,5 +1,6 @@
 package com.aglowid.myapplication.network.model
 
+import com.aglowid.myapplication.model.User
 import com.google.gson.annotations.SerializedName
 
 data class LoginResponse(

@@ -6,10 +6,13 @@ import android.util.Log
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import androidx.databinding.ObservableInt
+import androidx.databinding.ObservableParcelable
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aglowid.myapplication.R
+import com.aglowid.myapplication.database.UsersDatabase
+import com.aglowid.myapplication.model.XAcc
 import com.aglowid.myapplication.network.model.LoginResponse
 import com.aglowid.myapplication.network.model.RequestLoginUser
 import com.aglowid.myapplication.repository.LoginRepository
@@ -20,8 +23,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val loginRepository: LoginRepository
+    private val loginRepository: LoginRepository,
+    private val usersDatabase: UsersDatabase
 ) : ViewModel() {
+
+    val userData = loginRepository.user
+    val xAcc = loginRepository.xAcc
 
     var observerUsername: ObservableField<String> = ObservableField<String>("")
     var observerErrorUsername = ObservableInt()
@@ -30,9 +37,6 @@ class LoginViewModel @Inject constructor(
     var observerPassword: ObservableField<String> = ObservableField<String>("")
     var observerErrorPassword = ObservableInt()
     var observerErrorEnabledPassword = ObservableBoolean(false)
-
-    private val _loginResponse = MutableLiveData<LoginResponse>()
-    val loginResponse get() = _loginResponse
 
     fun resetPasswordError() {
         observerErrorPassword.set(R.string.empty_string)
@@ -59,8 +63,7 @@ class LoginViewModel @Inject constructor(
             observerUsername.get()!!,
             observerPassword.get()!!
         )
-
-        _loginResponse.postValue(loginRepository.loginUser(requestLoginUser))
+        loginRepository.loginUser(requestLoginUser)
 
     }
 }
